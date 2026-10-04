@@ -45,11 +45,12 @@ const Hero = () => {
 
         <div className="md:col-span-6 col-span-12 relative before:absolute before:content-[''] before:bg-[url('/images/hero/line-leyar.svg')] before:bg-no-repeat before:left-1/2 before:top-0 before:h-24 before:w-52 before:-z-10 before:translate-x-70% before:-translate-y-40% lg:before:inline-block before:hidden after:absolute after:content-[''] after:bg-[url('/images/hero/round-leyar.svg')] after:bg-no-repeat xl:after:inline-block after:hidden after:left-0 after:bottom-0 after:h-6.25 after:w-6.25 after:-z-10 after:-translate-x-1/2 after:translate-y-1/2">
           <Image
-            src={getImgPath('/images/hero/hero-image.png')}
-            alt='hero-image'
-            width={350}
-            height={150}
-            quality={100}
+            src={getImgPath('/images/hero/hero-banner.gif')}
+            alt='Animated preview of software built by Eagle Nest Technologies'
+            width={1400}
+            height={967}
+            priority
+            unoptimized
             style={{ width: '100%', height: 'auto' }}
           />
         </div>
