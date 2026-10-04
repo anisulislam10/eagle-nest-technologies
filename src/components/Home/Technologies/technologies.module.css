@@ -1,0 +1,15 @@
+.card { position: relative; isolation: isolate; display: flex; flex-direction: column; overflow: hidden; padding: 24px; border-width: 1px; border-radius: 20px; box-shadow: 0 6px 24px rgb(16 45 71 / 4%); transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
+.card::before { content: ''; position: absolute; inset: 0 0 auto; height: 170px; background: radial-gradient(ellipse at 50% 0%, var(--tint), transparent 75%); z-index: -1; pointer-events: none; }
+.artwork { position: relative; display: grid; place-items: center; height: 128px; margin-bottom: 20px; }
+.orbit { position: absolute; width: 112px; height: 112px; border: 1px dashed var(--accent); border-radius: 50%; opacity: .18; transform: rotate(-25deg) scaleY(.8); }
+.icon { display: grid; place-items: center; width: 72px; height: 72px; border: 1px solid var(--tint); border-radius: 22px; color: var(--accent); background: var(--tint); box-shadow: 0 12px 24px var(--tint), inset 0 1px 0 rgb(255 255 255 / 35%); animation: float 5s ease-in-out infinite; animation-delay: var(--delay); }
+.spark, .smallSpark { position: absolute; width: 10px; height: 10px; border-radius: 3px; background: var(--accent); opacity: .6; top: 24px; right: 22%; animation: float 6s ease-in-out infinite reverse; animation-delay: var(--delay); }
+.smallSpark { width: 6px; height: 6px; top: auto; right: auto; bottom: 24px; left: 20%; border-radius: 50%; }
+.codeMark { position: absolute; right: 12%; bottom: 19px; font-size: 13px; font-weight: 700; animation: float 7s ease-in-out infinite; animation-delay: var(--delay); }
+.eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.tools { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; margin-top: auto; padding-top: 4px; }
+.tool { display: inline-flex; align-items: center; gap: 6px; border-width: 1px; border-radius: 8px; padding: 6px 9px; font-size: 12px; font-weight: 500; }
+.dot { width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: var(--accent); }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-9px) rotate(3deg); } }
+@media (hover: hover) { .card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 16px 36px var(--tint); } }
+@media (prefers-reduced-motion: reduce) { .icon, .spark, .smallSpark, .codeMark { animation: none; } .card { transition: none; } .card:hover { transform: none; } }
