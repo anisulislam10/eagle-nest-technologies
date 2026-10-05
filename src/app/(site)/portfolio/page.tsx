@@ -1,5 +1,5 @@
 import React from "react";
-import Portfolio from "@/components/portfolio/PortfolioList";
+import Projects from "@/components/Home/Projects";
 import HeroSub from "@/components/SharedComponent/HeroSub";
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -15,10 +15,10 @@ const PortfolioList = () => {
         <>
             <HeroSub
                 title="Portfolio"
-                description="Dive into a curated collection of my finest work, showcasing expertise across various industries."
+                description="Explore the software products built by Eagle Nest Technologies."
                 breadcrumbLinks={breadcrumbLinks}
             />
-            <Portfolio />
+            <Projects showAll />
         </>
     );
 };

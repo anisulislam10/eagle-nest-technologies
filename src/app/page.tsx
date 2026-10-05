@@ -5,6 +5,7 @@ import Counter from '@/components/Home/Counter'
 import Progresswork from '@/components/Home/WorkProgress';
 import Services from '@/components/Home/Services';
 import Technologies from '@/components/Home/Technologies';
+import Team from '@/components/Home/Team';
 import Projects from '@/components/Home/Projects';
 import Testimonials from '@/components/Home/Testimonials';
 import Contactform from '@/components/Home/Contact';
@@ -21,6 +22,7 @@ export default function Home() {
       <Services />
       <Technologies />
       <Projects />
+      <Team />
       <Testimonials />
       <Contactform />
     </main>
