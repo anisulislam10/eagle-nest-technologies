@@ -6,7 +6,7 @@ import styles from './admin.module.css'
 import { validateImageFile, imageExtensions } from '@/lib/content/image-upload'
 
 export default function ImageUpload({ value, onChange, onBusyChange, disabled, folder }: {
-  value: string; onChange: (url: string) => void; onBusyChange: (busy: boolean) => void; disabled: boolean; folder: 'projects' | 'team'
+  value: string; onChange: (url: string) => void; onBusyChange: (busy: boolean) => void; disabled: boolean; folder: 'projects' | 'team' | 'clients'
 }) {
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState('')
@@ -33,7 +33,7 @@ export default function ImageUpload({ value, onChange, onBusyChange, disabled, f
       const code = (cause as { code?: string }).code
       if (mounted.current) setError(code === 'storage/canceled' ? 'Upload canceled.' : code === 'storage/unauthorized'
         ? 'Upload denied. Publish storage.rules in Firebase Storage and confirm your admin access.'
-        : 'Upload failed. Check your connection, enable Firebase Storage, and verify the storage bucket in .env.')
+        : 'Upload failed. Check your connection and Firebase Storage setup, bucket name, and billing. A failed preflight can mean the bucket is unavailable. You can also paste an HTTPS image URL below.')
     } finally {
       task.current = null
       if (mounted.current) { setProgress(null); onBusyChange(false) }

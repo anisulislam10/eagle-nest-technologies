@@ -30,3 +30,10 @@ test('enforces text and technology limits', () => {
   assert.notEqual(validateItem({ ...valid, technologies: Array(21).fill('React') }), null);
   assert.notEqual(validateItem({ ...valid, technologies: ['x'.repeat(81)] }), null);
 });
+test('clients allow optional details but require a logo', () => {
+  const client = { ...valid, category: '', description: '', image: 'https://example.com/logo.png' };
+  assert.equal(validateItem(client, 'clients'), null);
+  assert.notEqual(validateItem({ ...client, image: '' }, 'clients'), null);
+  assert.notEqual(validateItem({ ...client, image: 'javascript:alert(1)' }, 'clients'), null);
+  assert.notEqual(validateItem(client, 'projects'), null);
+});

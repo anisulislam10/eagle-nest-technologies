@@ -83,10 +83,10 @@ export default function Technologies() {
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-midnight_text dark:text-white mb-12">
           The right tools for your product
         </h2>
-      </div>
-      <div className="space-y-4">
-        <MarqueeRow items={technologies.slice(0, 7)} direction="forward" />
-        <MarqueeRow items={technologies.slice(7)} direction="reverse" />
+        <div className="space-y-4">
+          <MarqueeRow items={technologies.slice(0, 7)} direction="forward" />
+          <MarqueeRow items={technologies.slice(7)} direction="reverse" />
+        </div>
       </div>
     </section>
   )

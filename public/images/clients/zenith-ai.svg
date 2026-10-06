@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="#8B5CF6"/>
+  <circle cx="16" cy="11" r="2.5" fill="white"/>
+  <circle cx="11" cy="20" r="2.5" fill="white"/>
+  <circle cx="21" cy="20" r="2.5" fill="white"/>
+  <path d="M16 11L11 20M16 11L21 20M11 20H21" stroke="white" stroke-width="1.5"/>
+  <text x="40" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="currentColor">Zenith</text>
+  <text x="82" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="400" fill="#8B5CF6">AI</text>
+</svg>

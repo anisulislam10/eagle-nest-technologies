@@ -31,8 +31,9 @@ To revoke an administrator, set their membership's `active` field to `false` or 
 1. Open Firebase Console → Storage and create/enable the storage bucket. Complete any setup or billing requirements shown by Firebase.
 2. Confirm `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` matches the bucket name displayed in the console. Restart the development server if you change it.
 3. In **Storage → Rules** (not Firestore Rules), publish the complete contents of `storage.rules`. If prompted, grant the permissions required for Storage rules to read Firestore admin membership.
-4. Alternatively deploy both sets of rules with `firebase deploy --only firestore:rules,storage --project YOUR_PROJECT_ID`.
-5. Sign in at `/admin`, add/edit a project or team member, and choose an image from your computer. Wait for upload completion, then save.
+4. If the browser reports a CORS/preflight failure, inspect the OPTIONS request status in the Network tab first. A **404 Not Found** from the bucket endpoint points to an incorrect or unavailable bucket. Verify that Storage is provisioned and copy the exact bucket name from Firebase Console → Storage into `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, then restart the development server. Adding a bucket name to `.env` does not create the bucket. Cloud Storage requires the Blaze billing plan; check billing and complete Storage setup in the console. Firestore rules do not control Storage uploads. Do not guess a different bucket suffix or apply CORS changes to fix a missing bucket. See [Firebase's Storage setup guide](https://firebase.google.com/docs/storage/web/start).
+   Alternatively, paste a public HTTPS image URL directly into the Image URL field without using Storage uploads.
+5. Sign in at `/admin`, add/edit a project or team member, and choose an image from your computer or enter an image URL, then save.
 
 Only active administrators can upload files. Images are stored under `content/projects/` or `content/team/` with unique names. These are public website assets, including images attached to drafts; do not upload private documents. Uploads cannot overwrite existing files. Removing an image from an entry, replacing it, canceling an edit, or deleting the entry does not delete the original stored asset; unused assets can be removed from the Firebase Storage console.
 
@@ -50,3 +51,12 @@ After connecting your project, verify these flows with a real admin and a separa
 The build and local validation tests do not deploy or exercise live Firebase rules. Firebase configuration, rule publication, and the first administrator must be provisioned before live end-to-end verification.
 
 Development uses `.next-dev`; production builds use `.next` to avoid missing-chunk errors when both run together. `vercel.json` is unchanged.
+
+## Contact requests / Quotations
+
+The contact form writes to `quotations` and sends no email. Publish the updated **firestore.rules** in Firestore Database → Rules before using this feature. Signed-out visitors can create strictly validated requests, but only active administrators can read them. Visitors cannot edit submissions or change their status.
+
+In `/admin`, choose **Quotations**. New requests appear live, newest first. Search by name, email, service, or message, filter by status, and select **View request** to read every field. Administrators can change status to New, Reviewed, or Closed; the visitor's original response is preserved. Optional preferred dates and times include the visitor's browser time zone. No email delivery service is configured or called.
+
+Verify in your connected Firebase project: submit from a signed-out browser, confirm success appears only after the write is acknowledged, then open the admin inbox and check all fields and status updates. Public reads of the quotations collection must fail. This public create endpoint validates shape and size but does not implement rate limiting; Firebase App Check or a server-side abuse-control layer can be added if needed.
+

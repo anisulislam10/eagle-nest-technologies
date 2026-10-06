@@ -10,28 +10,52 @@ service cloud.firestore {
       return value is string && value.size() <= 2000
         && (value == '' || value.matches('https://[^/\\s]+.*'));
     }
-    function validContent() {
+    function validContent(isClient) {
       let data = request.resource.data;
       return data.keys().hasAll(['title', 'category', 'description', 'image', 'alt', 'technologies', 'link', 'order', 'published', 'updatedAt'])
         && data.keys().hasOnly(['title', 'category', 'description', 'image', 'alt', 'technologies', 'link', 'order', 'published', 'updatedAt'])
         && data.title is string && data.title.size() > 0 && data.title.size() <= 120
-        && data.category is string && data.category.size() > 0 && data.category.size() <= 120
-        && data.description is string && data.description.size() > 0 && data.description.size() <= 2000
+        && data.category is string && (isClient || data.category.size() > 0) && data.category.size() <= 120
+        && data.description is string && (isClient || data.description.size() > 0) && data.description.size() <= 2000
         && data.alt is string && data.alt.size() <= 200
+        && (!isClient || data.image != '')
         && httpsOrEmpty(data.image) && httpsOrEmpty(data.link)
         && data.technologies is list && data.technologies.size() <= 20
         && data.order is int && data.order >= 0 && data.order <= 10000
         && data.published is bool && data.updatedAt == request.time;
+    }
+    match /quotations/{id} {
+      function validQuotation() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['firstName', 'lastName', 'email', 'service', 'date', 'time', 'timeZone', 'message', 'status', 'createdAt'])
+          && d.keys().hasOnly(['firstName', 'lastName', 'email', 'service', 'date', 'time', 'timeZone', 'message', 'status', 'createdAt'])
+          && d.firstName is string && d.firstName.size() > 0 && d.firstName.size() <= 80
+          && d.lastName is string && d.lastName.size() > 0 && d.lastName.size() <= 80
+          && d.email is string && d.email.size() <= 254 && d.email.matches('[^@ ]+@[^@ ]+[.][^@ ]+')
+          && d['service'] in ['Mobile App Development', 'Web App Development', 'Backend & API Development', 'AI Development & Integration']
+          && d.message is string && d.message.size() > 0 && d.message.size() <= 5000
+          && d.date is string && (d.date == '' || d.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+          && d.time is string && (d.time == '' || d.time.matches('([01][0-9]|2[0-3]):[0-5][0-9]'))
+          && ((d.date == '' && d.time == '') || (d.date != '' && d.time != ''))
+          && d.timeZone is string && d.timeZone.size() > 0 && d.timeZone.size() <= 100
+          && d.status == 'new' && d.createdAt == request.time;
+      }
+      allow create: if validQuotation();
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['new', 'reviewed', 'closed'];
+      allow delete: if false;
     }
     match /admins/{uid} {
       allow get: if request.auth != null && request.auth.uid == uid;
       allow list, write: if false;
     }
     match /{collection}/{id} {
-      allow read: if collection in ['projects', 'team']
+      allow read: if collection in ['projects', 'team', 'clients']
         && (resource.data.published == true || isAdmin());
-      allow create, update: if collection in ['projects', 'team'] && isAdmin() && validContent();
-      allow delete: if collection in ['projects', 'team'] && isAdmin();
+      allow create, update: if collection in ['projects', 'team', 'clients'] && isAdmin() && validContent(collection == 'clients');
+      allow delete: if collection in ['projects', 'team', 'clients'] && isAdmin();
     }
   }
 }

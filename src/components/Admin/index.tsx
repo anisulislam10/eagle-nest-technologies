@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import ImageUpload from './ImageUpload'
+import Quotations from './Quotations'
 import styles from './admin.module.css'
 import { useEffect, useState, type FormEvent } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
@@ -22,6 +23,7 @@ function DashboardIcon({ name }: { name: string }) {
 }
 
 export default function Admin() {
+  const [showQuotations, setShowQuotations] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
@@ -35,7 +37,7 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
-  const [tab, setTab] = useState<ManagedCollection>('projects')
+  const [tab, setTab] = useState<Exclude<ManagedCollection, 'clients'>>('projects')
   const [items, setItems] = useState<ManagedItem[]>([])
   const [loading, setLoading] = useState(false)
   const [editing, setEditing] = useState<ManagedItem | null>(null)
@@ -75,7 +77,13 @@ export default function Admin() {
     return onSnapshot(collection(getDb(), tab), snapshot => {
       setItems(snapshot.docs.map(item => ({ ...blankItem, ...item.data(), id: item.id }) as ManagedItem).sort((a, b) => a.order - b.order || a.title.localeCompare(b.title)))
       setLoading(false)
-    }, () => { setError('Unable to load content. Check your connection and administrator access.'); setLoading(false) })
+    }, cause => {
+      const code = (cause as { code?: string })?.code
+      setError(code === 'permission-denied'
+        ? `Firestore denied access to the "${tab}" collection. Please publish the project's updated firestore.rules in Firebase Console → Firestore Database → Rules, then reload.`
+        : `Unable to load content (${code || 'unknown error'}). Check your connection and administrator access.`)
+      setLoading(false)
+    })
   }, [allowed, tab])
 
   async function login(event: FormEvent) {
@@ -95,7 +103,7 @@ export default function Admin() {
     event.preventDefault()
     if (!editing || !allowed || uploading) return
     const value = { ...editing, title: editing.title.trim(), category: editing.category.trim(), description: editing.description.trim(), image: editing.image.trim(), link: editing.link.trim(), technologies: tab === 'projects' ? Array.from(new Set(technologies.split(',').map(v => v.trim()).filter(Boolean))) : [] }
-    const validation = validateItem(value)
+    const validation = validateItem(value, tab)
     if (validation) { setError(validation); return }
     setBusy(true); setError(''); setNotice('')
     const { id, ...fields } = value
@@ -119,11 +127,11 @@ export default function Admin() {
   const locked = busy || uploading
   const published = items.filter(item => item.published).length
   const visible = items.filter(item => (filter === 'all' || (filter === 'published' ? item.published : !item.published)) && `${item.title} ${item.category}`.toLowerCase().includes(search.toLowerCase()))
-  const title = tab === 'projects' ? 'Projects' : 'Team members'
+  const title = showQuotations ? 'Quotations' : tab === 'projects' ? 'Projects' : 'Team members'
   const singular = tab === 'projects' ? 'project' : 'team member'
-  function changeTab(name: ManagedCollection) {
+  function changeTab(name: Exclude<ManagedCollection, 'clients'>) {
     if (locked || (editing && !window.confirm('Discard unsaved changes?'))) return
-    setTab(name); setEditing(null); setPendingDelete(null); setError(''); setNotice(''); setSearch(''); setFilter('all'); setMenuOpen(false)
+    setShowQuotations(false); setTab(name); setEditing(null); setPendingDelete(null); setError(''); setNotice(''); setSearch(''); setFilter('all'); setMenuOpen(false)
   }
   const messages = <>{error && <div role="alert" className={styles.error}>{error}</div>}{notice && <div role="status" className={styles.success}>{notice}</div>}</>
 
@@ -148,16 +156,18 @@ export default function Admin() {
       <div className={styles.workspace}>Content workspace<span>ADMIN PANEL</span></div>
       <p className={styles.navLabel}>MANAGE CONTENT</p>
       <nav aria-label="Admin navigation" className={styles.navigation}>
-        <button disabled={locked} aria-current={tab === 'projects' ? 'page' : undefined} onClick={() => changeTab('projects')}><DashboardIcon name="projects" />Projects<span>→</span></button>
-        <button disabled={locked} aria-current={tab === 'team' ? 'page' : undefined} onClick={() => changeTab('team')}><DashboardIcon name="team" />Team members<span>→</span></button>
+        <button disabled={locked} aria-current={!showQuotations && tab === 'projects' ? 'page' : undefined} onClick={() => changeTab('projects')}><DashboardIcon name="projects" />Projects<span>→</span></button>
+        <button disabled={locked} aria-current={!showQuotations && tab === 'team' ? 'page' : undefined} onClick={() => changeTab('team')}><DashboardIcon name="team" />Team members<span>→</span></button>
+        <button disabled={locked} aria-current={showQuotations ? 'page' : undefined} onClick={() => { if (editing && !window.confirm('Discard unsaved changes?')) return; setEditing(null); setPendingDelete(null); setError(''); setNotice(''); setShowQuotations(true); setMenuOpen(false) }}><DashboardIcon name="draft" />Quotations<span>→</span></button>
       </nav>
       <div className={styles.sidebarBottom}><Link href="/" target="_blank" rel="noopener noreferrer"><DashboardIcon name="external" />View website ↗</Link><div className={styles.account}><span className={styles.avatar}>{user.email?.slice(0, 1).toUpperCase() || 'A'}</span><div><strong>Administrator</strong><small>{user.email}</small></div></div><button disabled={locked} onClick={logout}>Sign out</button></div>
     </aside>
     <div className={styles.mainArea}>
       <header className={styles.topbar}><div className={styles.breadcrumb}><button className={styles.menuButton} onClick={() => setMenuOpen(true)} aria-label="Open navigation" aria-expanded={menuOpen}>☰</button><span>Workspace</span><span>/</span><strong>{title}</strong></div><span className={styles.topBadge}>Administrator</span></header>
       <main className={styles.content}>
-        <div className={styles.pageHeading}><div><p className={styles.eyebrow}>CONTENT MANAGEMENT</p><h1>{editing ? `${editing.id ? 'Edit' : 'New'} ${singular}` : title}</h1><p className={styles.muted}>{tab === 'projects' ? 'Showcase the work you are proud of.' : 'Introduce the people behind Eagle Nest.'}</p></div>{!editing && <button disabled={locked} className={buttonClass} onClick={() => edit({ ...blankItem, order: items.length ? Math.min(10000, Math.max(...items.map(item => item.order)) + 1) : 0 })}>+ Add {singular}</button>}</div>
+        <div className={styles.pageHeading}><div><p className={styles.eyebrow}>CONTENT MANAGEMENT</p><h1>{editing ? `${editing.id ? 'Edit' : 'New'} ${singular}` : title}</h1><p className={styles.muted}>{showQuotations ? 'Read and manage requests sent through your contact form.' : tab === 'projects' ? 'Showcase the work you are proud of.' : 'Introduce the people behind Eagle Nest.'}</p></div>{!showQuotations && !editing && <button disabled={locked} className={buttonClass} onClick={() => edit({ ...blankItem, order: items.length ? Math.min(10000, Math.max(...items.map(item => item.order)) + 1) : 0 })}>+ Add {singular}</button>}</div>
         {messages}
+        {showQuotations ? <Quotations /> : <>
         {!editing && <div className={styles.stats}>{[{label: `Total ${tab === 'projects' ? 'projects' : 'members'}`, value: items.length, icon: tab}, {label: 'Published', value: published, icon: 'check'}, {label: 'Drafts', value: items.length - published, icon: 'draft'}].map(stat => <div key={stat.label} className={styles.stat}><div><p>{stat.label}</p><strong>{loading ? '—' : stat.value}</strong></div><span className={styles.statIcon}><DashboardIcon name={stat.icon} /></span></div>)}</div>}
         {editing ? <form onSubmit={save}>
           <div className={styles.editorGrid}>
@@ -185,6 +195,7 @@ export default function Admin() {
           <div className={styles.listFooter}>{visible.length} of {items.length} entries</div>
         </div>}
         {pendingDelete && <div role="alert" className={styles.deleteConfirm}><h2>Delete {singular}?</h2><p>“{pendingDelete.title}” will be removed from the website. This cannot be undone.</p><div><button disabled={locked} onClick={remove} className={styles.danger}>{busy ? 'Deleting…' : 'Delete entry'}</button><button disabled={locked} onClick={() => setPendingDelete(null)} className={styles.secondary}>Keep entry</button></div></div>}
+        </>}
       </main>
     </div>
   </div>

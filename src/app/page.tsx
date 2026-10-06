@@ -20,8 +20,8 @@ export default function Home() {
       <Counter isColorMode={false} />
       <Progresswork isColorMode={false} />
       <Services />
-      <Technologies />
       <Projects />
+      <Technologies />
       <Team />
       <Testimonials />
       <Contactform />

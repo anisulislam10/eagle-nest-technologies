@@ -7,14 +7,15 @@
 .track {
   display: flex;
   width: max-content;
-  animation: marquee-scroll 30s linear infinite;
+  animation: marquee-scroll 32s linear infinite;
 }
 
 .reverse .track {
   animation-direction: reverse;
 }
 
-.marquee:hover .track {
+.marquee:hover .track,
+.paused .track {
   animation-play-state: paused;
 }
 
