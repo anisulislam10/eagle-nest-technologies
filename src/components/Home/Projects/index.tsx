@@ -15,7 +15,7 @@ export default function Projects({ showAll = false }: { showAll?: boolean }) {
       {!loading && !error && !items.length && <p className="text-center text-grey dark:text-white/60">New projects will be shared here soon.</p>}
       <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-7">
         {(showAll ? items : items.slice(0, 6)).map(item => <article key={item.id} className="flex flex-col overflow-hidden rounded-md bg-white shadow-service dark:bg-darkmode">
-          {item.image && validUrl(item.image) ? <Image src={item.image} alt={item.alt || item.title} width={600} height={450} unoptimized className="aspect-[4/3] w-full object-cover" /> : <div className="aspect-[4/3] bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold" aria-hidden="true">{'</>'}</div>}
+          {item.image && validUrl(item.image) ? <Image src={item.image} alt={item.alt || item.title} width={600} height={450} unoptimized className="aspect-[4/3] w-full object-contain object-center p-5" /> : <div className="aspect-[4/3] bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold" aria-hidden="true">{'</>'}</div>}
           <div className="flex flex-1 flex-col gap-3 p-6">
             <p className="text-primary text-sm">{item.category}</p><h3 className="text-xl font-bold">{item.title}</h3>
             <p className="text-sm text-grey dark:text-white/60 whitespace-pre-line">{item.description}</p>
